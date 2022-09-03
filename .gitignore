@@ -1,1 +1,4 @@
 *.pyc
+/videos
+videorhyme/sp2txt/model_checkpoints/
+videorhyme/sp2txt/pretrained_models/
