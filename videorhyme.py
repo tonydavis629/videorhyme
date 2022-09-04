@@ -1,7 +1,7 @@
 # from videorhyme.yt_dl import VideoRhyme
 from videorhyme.youtube_dl.yt_dl import yt_dl
 
-downloader = yt_dl(query = 'what are solutions to the climate crisis planet a', num_videos = 1, save_dir='videos')
+downloader = yt_dl(query = 'president speech', num_videos = 5, save_dir='videos')
 downloader.download()
 
 # vr = VideoRhyme('presidential speech', num_videos=10)
