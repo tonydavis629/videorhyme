@@ -1,7 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
 def get_video_results(query: str, num_videos: int):
+
     driver = webdriver.Chrome()
     driver.get('https://www.youtube.com/results?search_query=' + query)
  

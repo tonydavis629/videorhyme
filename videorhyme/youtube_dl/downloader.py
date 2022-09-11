@@ -11,22 +11,26 @@ class Downloader:
 
     def download(self):
         yt = YouTube(self.link)
-        yv = yt.streams.filter(only_video=True, adaptive=True, file_extension='mp4').order_by('resolution').desc().first() #video stream with highest resolution
-        ya = yt.streams.filter(only_audio=True).order_by('abr').desc().first() #audio stream with highest resolutions
         path = os.path.join(self.save_dir, self.title)
         
         #download subtitles
-        yc = get_caption_by_language_name(yt, 'English')
+        # this doesn't work in WSL?
+        # yc = get_caption_by_language_name(yt, 'English')
+        # if yc == None:
+        #     yc = get_caption_by_language_name(yt, 'English (auto-generated)')
+        #     if yc == None:
+        #         print('No captions found for video: ' + self.title)
+        
+        yc = yt.captions.get_by_language_code('en')
         if yc == None:
-            yc = get_caption_by_language_name(yt, 'English (auto-generated)')
+            yc = yt.captions.get_by_language_code('a.en')
             if yc == None:
                 print('No captions found for video: ' + self.title)
-        try:
-            yc.download(output_path = path, title = self.title + '.srt', srt=True)
-        except:
-             warnings.warn('Error downloading captions for video: ' + self.title)
-             return 
+                return
+        yc.download(output_path = path, title = self.title + '.srt', srt=True)
             
+        yv = yt.streams.filter(only_video=True, adaptive=True, file_extension='mp4').order_by('resolution').desc().first() #video stream with highest resolution
+        ya = yt.streams.filter(only_audio=True).order_by('abr').desc().first() #audio stream with highest resolutions
         #download video
         yv.download(output_path = path, filename = self.title + '.mp4')
         

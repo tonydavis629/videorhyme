@@ -5,6 +5,7 @@ import os
 class rhymer():
     def __init__(self, srts_dir:str):
         self.videos, self.scripts = self.load_srts(srts_dir)
+        self.words = self.get_words() # get all words to rhyme with
     def load_srts(self, srts_dir:str):
         #find the paths of the srt files
         # srt_paths = glob.glob(srts_dir + '/*/*.srt')
@@ -33,6 +34,14 @@ class rhymer():
                         script.append(cap_set)
                 scripts.append(script)
         return videos, scripts
+    def get_words(self):
+        """Take the scripts, pull out the last word of each phrase, and return a list of all words"""
+        words = []
+        for script in self.scripts:
+            for cap_set in script:
+                text = cap_set[2]
+                words.append(text.split(' ')[-1])
+        return words
         
 rh = rhymer('/home/tony/github/videorhyme/videos')
 rh.videos
