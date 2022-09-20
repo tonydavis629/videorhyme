@@ -51,23 +51,23 @@ class rhymer():
                 for word in phrase:
                     lookup.append((video,start,stop))
                 words.extend(phrase)
-        return words, lookup
-      
-    def rhymes(self, word1:str, word2:str):
-        return word1 in pronouncing.rhymes(word2)
+        return np.array(words), np.array(lookup)
         
     def rhyme_matrix(self):
         num_words = len(self.words)
         rhy_mat = np.zeros((num_words,num_words))
-        for x,row in enumerate(tqdm(rhy_mat)):
-            rhymingwords = pronouncing.rhymes(self.words[x])
-            for y,word in enumerate(self.words):
+        for x,row in enumerate(tqdm(rhy_mat)): # iterate over rows
+            rhymingwords = pronouncing.rhymes(self.words[x]) # get rhyming words
+            for y,word in enumerate(self.words[x:]): # iterate over valid columns
                 if word in rhymingwords:
-                    rhy_mat[x,y] = 1
-            # for y,val in enumerate(row):
-            #     rhy_mat[x,y] = self.rhymes(self.words[x],self.words[y])
-                
+                    rhy_mat[x,y+x] = 1 #triangular matrix 
         return rhy_mat
+    
+    def get_rhymes(self):
+        """Returns a list of rhymes with their corresponding time stamps"""
+        x,y = np.where(self.rhyme_matrix == 1)
+        rhymes = [self.words[x],self.words[y],self.lookup[x],self.lookup[y]]
+        return rhymes
         
 rh = rhymer('/home/tony/github/videorhyme/videos')
-print(np.where(rh.rhyme_matrix==1))
+print(rh.get_rhymes())
