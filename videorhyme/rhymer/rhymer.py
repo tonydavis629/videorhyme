@@ -2,6 +2,8 @@ import numpy as np
 import glob
 import os
 import nltk
+import pronouncing
+from tqdm import tqdm
 
 class rhymer():
     def __init__(self, srts_dir:str):
@@ -31,8 +33,7 @@ class rhymer():
                         end = time_stamps[1]
                     elif i % 4 == 2:  # get text
                         text = line.replace('\n', '')[1:] #remove leading space
-                    if i % 4 == 3: # append to script
-                        cap_set = [begin, end, text]
+                        cap_set = [begin, end, text] #misses the last line
                         script.append(cap_set)
                 scripts.append(script)
         return videos, scripts
@@ -48,34 +49,25 @@ class rhymer():
                 text = cap_set[2]
                 phrase = text.split(' ')
                 for word in phrase:
-                    lookup.extend((video,start,stop))
+                    lookup.append((video,start,stop))
                 words.extend(phrase)
         return words, lookup
-    
-    def rhyme(self, inp, level):
-        entries = nltk.corpus.cmudict.entries()
-        syllables = [(word, syl) for word, syl in entries if word == inp]
-        rhymes = []
-        for (word, syllable) in syllables:
-                rhymes += [word for word, pron in entries if pron[-level:] == syllable[-level:]]
-        return set(rhymes)
-    
-    def rhymescore(self,word1:str,word2:str):
-        """Takes in two words and rates how well they rhyme"""
-        if word1.find(word2) == len(word1) - len(word2):
-            return False
-        if word2.find(word1) == len(word2) - len(word1): 
-            return False
-        return word1 in self.rhyme(word2, 1)
+      
+    def rhymes(self, word1:str, word2:str):
+        return word1 in pronouncing.rhymes(word2)
         
     def rhyme_matrix(self):
-        num_words = sum([len(i) for i in self.words])
+        num_words = len(self.words)
         rhy_mat = np.zeros((num_words,num_words))
-        for x,row in enumerate(rhy_mat):
-            for y,val in enumerate(row):
-                rhy_mat[x,y] = self.rhymescore(self.words(x),self.words(y))
+        for x,row in enumerate(tqdm(rhy_mat)):
+            rhymingwords = pronouncing.rhymes(self.words[x])
+            for y,word in enumerate(self.words):
+                if word in rhymingwords:
+                    rhy_mat[x,y] = 1
+            # for y,val in enumerate(row):
+            #     rhy_mat[x,y] = self.rhymes(self.words[x],self.words[y])
                 
         return rhy_mat
         
 rh = rhymer('/home/tony/github/videorhyme/videos')
-print(rh.rhyme_matrix())
+print(np.where(rh.rhyme_matrix==1))
